@@ -30,7 +30,7 @@ export default function Header({ onMenuClick }) {
 
         <div>
           <h2 className="text-xl font-bold text-gray-800">
-            {title}
+            {/* {title} */} Dashboard
           </h2>
           <p className="text-xs text-gray-400">
             Welcome back, Admin!

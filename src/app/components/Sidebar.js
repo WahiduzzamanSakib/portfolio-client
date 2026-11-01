@@ -13,6 +13,7 @@ import {
   FiInfo,
   FiSettings,
   FiLogOut,
+  FiCode,
 } from "react-icons/fi";
 
 const menuItems = [
@@ -20,7 +21,8 @@ const menuItems = [
   { name: "Profile", icon: FiUser, link: "/dashboard/profile" },
   { name: "Add Project", icon: FiPlusSquare, link: "/dashboard/add-project" },
   { name: "All Projects", icon: FiFolder, link: "/dashboard/all-projects" },
-  { name: "Website", icon: FiGlobe, link: "/dashboard/website" },
+  // { name: "Website", icon: FiGlobe, link: "/dashboard/website" },
+  { name: "All APIs", icon: FiCode, link: "/dashboard/all-apis" },
   { name: "About", icon: FiInfo, link: "/dashboard/about" },
 ];
 
