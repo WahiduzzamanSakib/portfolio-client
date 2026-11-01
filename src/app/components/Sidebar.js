@@ -21,7 +21,7 @@ const menuItems = [
   { name: "Add Project", icon: FiPlusSquare, link: "/dashboard/add-project" },
   { name: "All Projects", icon: FiFolder, link: "/dashboard/all-projects" },
   { name: "Website", icon: FiGlobe, link: "/dashboard/website" },
-  { name: "About Owner", icon: FiInfo, link: "/dashboard/about-owner" },
+  { name: "About", icon: FiInfo, link: "/dashboard/about" },
 ];
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {

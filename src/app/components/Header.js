@@ -10,7 +10,7 @@ const pageTitles = {
   "/dashboard/add-project": "Add Project",
   "/dashboard/all-projects": "All Projects",
   "/dashboard/website": "Website",
-  "/dashboard/about-owner": "About Owner",
+  "/dashboard/about": "About",
 };
 
 export default function Header({ onMenuClick }) {
