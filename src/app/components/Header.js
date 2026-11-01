@@ -23,7 +23,7 @@ export default function Header({ onMenuClick }) {
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="md:hidden text-xl text-black pr-2"
+          className="md:hidden text-xl text-black pr-2 cursor-pointer"
         >
           <FiMenu />
         </button>
@@ -58,7 +58,7 @@ export default function Header({ onMenuClick }) {
 
           <div className="hidden sm:block">
             <p className="text-sm font-semibold">Admin</p>
-            <p className="text-xs text-gray-400">Administrator</p>
+            {/* <p className="text-xs text-gray-400">Administrator</p> */}
           </div>
         </div>
       </div>
