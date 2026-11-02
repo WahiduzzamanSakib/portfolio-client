@@ -3,6 +3,7 @@
 
 import { FiSearch, FiBell, FiMenu } from "react-icons/fi";
 import { usePathname } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const pageTitles = {
   "/dashboard": "Dashboard",
@@ -16,6 +17,11 @@ const pageTitles = {
 export default function Header({ onMenuClick }) {
   const pathname = usePathname();
   const title = pageTitles[pathname] || "Dashboard";
+  const { data: session } = authClient.useSession();
+  const name = session?.user?.name || "Admin";
+  const image = session?.user?.image;
+  // console.log(data)
+
 
   return (
     <header className="bg-white border-b border-gray-200 px-5 md:px-8 h-[76px] flex items-center justify-between sticky top-0 z-30">
@@ -52,13 +58,20 @@ export default function Header({ onMenuClick }) {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-            A
-          </div>
+          {image ? (
+            <img
+              src={image}
+              alt={name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+              {name.charAt(0).toUpperCase()}
+            </div>
+          )}
 
           <div className="hidden sm:block">
-            <p className="text-sm font-semibold">Admin</p>
-            {/* <p className="text-xs text-gray-400">Administrator</p> */}
+            <p className="text-sm font-semibold">{name}</p>
           </div>
         </div>
       </div>

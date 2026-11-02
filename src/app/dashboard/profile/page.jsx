@@ -1,8 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
-import { Button } from "@heroui/react";
+import React from "react";
 
 import {
   FiUser,
@@ -10,51 +9,39 @@ import {
   FiGlobe,
   FiGithub,
   FiLinkedin,
-  FiEdit2,
-  FiSave,
-  FiX,
   FiMapPin,
+  FiEdit2,
 } from "react-icons/fi";
 
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@heroui/react";
+import { EditModal } from "@/app/components/EditModal";
+
 const ProfilePage = () => {
-  const [isEditing, setIsEditing] = useState(false);
+  const { data: session, isPending } = authClient.useSession();
 
-  const [profile, setProfile] = useState({
-    name: "Your Name",
-    email: "yourname@gmail.com",
-    designation: "Frontend Developer",
-    location: "Dhaka, Bangladesh",
-    description:
-      "I am a passionate Frontend Developer. I love building modern, responsive and user-friendly web applications.",
-    portfolio: "https://yourportfolio.com",
-    github: "https://github.com/yourusername",
-    linkedin: "https://linkedin.com/in/yourusername",
-    image: "",
-  });
+  const data = session?.user;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  if (isPending) {
+    return (
+      <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+        <p className="text-gray-500 text-center">
+          Loading profile...
+        </p>
+      </div>
+    );
+  }
 
-    setProfile((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-
-    if (file) {
-      setProfile((prev) => ({
-        ...prev,
-        image: URL.createObjectURL(file),
-      }));
-    }
-  };
-
-  const handleSave = () => {
-    setIsEditing(false);
-    // পরে এখানে API দিয়ে MongoDB-তে save করবে
+  const profile = {
+    name: data?.name || "N/A",
+    email: data?.email || "N/A",
+    designation: data?.designation || "N/A",
+    location: data?.location || "N/A",
+    description: data?.description || "N/A",
+    portfolio: data?.portfolio || "N/A",
+    github: data?.github || "N/A",
+    linkedin: data?.linkedin || "N/A",
+    image: data?.image || "",
   };
 
   return (
@@ -62,7 +49,6 @@ const ProfilePage = () => {
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             My Profile
@@ -73,34 +59,14 @@ const ProfilePage = () => {
           </p>
         </div>
 
-        {!isEditing ? (
-          <Button
-            color="primary"
-            onPress={() => setIsEditing(true)}
-          >
-            <FiEdit2 />
-            Edit Profile
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button
-              color="primary"
-              onPress={handleSave}
-            >
-              <FiSave />
-              Save
-            </Button>
 
-            <Button
-              variant="bordered"
-              onPress={() => setIsEditing(false)}
-            >
-              <FiX />
-              Cancel
-            </Button>
-          </div>
-        )}
-
+        {/* <Button
+          color="primary"
+        >
+          <FiEdit2 />
+          Edit Profile
+        </Button> */}
+        <EditModal/>
       </div>
 
       {/* Profile Information */}
@@ -123,19 +89,6 @@ const ProfilePage = () => {
 
           </div>
 
-          {isEditing && (
-            <label className="mt-4 text-sm text-blue-600 font-medium cursor-pointer hover:underline">
-              Change Profile Image
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          )}
-
           <h3 className="font-bold text-xl mt-4 text-gray-900">
             {profile.name}
           </h3>
@@ -157,18 +110,9 @@ const ProfilePage = () => {
                 Full Name
               </label>
 
-              {isEditing ? (
-                <input
-                  name="name"
-                  value={profile.name}
-                  onChange={handleChange}
-                  className="profile-input"
-                />
-              ) : (
-                <p className="mt-2 text-gray-600">
-                  {profile.name}
-                </p>
-              )}
+              <p className="mt-2 text-gray-600">
+                {profile.name}
+              </p>
             </div>
 
             <div>
@@ -176,20 +120,10 @@ const ProfilePage = () => {
                 Email Address
               </label>
 
-              {isEditing ? (
-                <input
-                  name="email"
-                  type="email"
-                  value={profile.email}
-                  onChange={handleChange}
-                  className="profile-input"
-                />
-              ) : (
-                <p className="mt-2 text-gray-600 flex items-center gap-2">
-                  <FiMail className="text-blue-500" />
-                  {profile.email}
-                </p>
-              )}
+              <p className="mt-2 text-gray-600 flex items-center gap-2">
+                <FiMail className="text-blue-500" />
+                {profile.email}
+              </p>
             </div>
 
             <div>
@@ -197,18 +131,9 @@ const ProfilePage = () => {
                 Designation
               </label>
 
-              {isEditing ? (
-                <input
-                  name="designation"
-                  value={profile.designation}
-                  onChange={handleChange}
-                  className="profile-input"
-                />
-              ) : (
-                <p className="mt-2 text-gray-600">
-                  {profile.designation}
-                </p>
-              )}
+              <p className="mt-2 text-gray-600">
+                {profile.designation}
+              </p>
             </div>
 
             <div>
@@ -216,19 +141,10 @@ const ProfilePage = () => {
                 Location
               </label>
 
-              {isEditing ? (
-                <input
-                  name="location"
-                  value={profile.location}
-                  onChange={handleChange}
-                  className="profile-input"
-                />
-              ) : (
-                <p className="mt-2 text-gray-600 flex items-center gap-2">
-                  <FiMapPin className="text-blue-500" />
-                  {profile.location}
-                </p>
-              )}
+              <p className="mt-2 text-gray-600 flex items-center gap-2">
+                <FiMapPin className="text-blue-500" />
+                {profile.location}
+              </p>
             </div>
 
           </div>
@@ -239,23 +155,12 @@ const ProfilePage = () => {
               About Me
             </label>
 
-            {isEditing ? (
-              <textarea
-                name="description"
-                rows="4"
-                value={profile.description}
-                onChange={handleChange}
-                className="profile-input resize-none"
-              />
-            ) : (
-              <p className="mt-2 text-gray-600 leading-7">
-                {profile.description}
-              </p>
-            )}
+            <p className="mt-2 text-gray-600 leading-7">
+              {profile.description}
+            </p>
           </div>
 
           {/* Social Links */}
-
           <div>
             <h3 className="font-semibold text-gray-800 mb-4">
               Social & Portfolio Links
@@ -284,32 +189,24 @@ const ProfilePage = () => {
 
                 return (
                   <div key={item.name} className="min-w-0">
-                    {isEditing ? (
-                      <div className="w-full sm:w-56">
-                        <label className="text-xs text-gray-500 mb-1 block">
-                          {item.label}
-                        </label>
 
-                        <input
-                          name={item.name}
-                          value={profile[item.name]}
-                          onChange={handleChange}
-                          className="profile-input"
-                        />
-                      </div>
-                    ) : (
-                      <a
-                        href={profile[item.name]}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
-                      >
-                        <Icon className="text-lg" />
-                        <span className="text-sm font-medium">
-                          {item.label}
-                        </span>
-                      </a>
-                    )}
+                    <a
+                      href={
+                        profile[item.name] !== "N/A"
+                          ? profile[item.name]
+                          : undefined
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+                    >
+                      <Icon className="text-lg" />
+
+                      <span className="text-sm font-medium">
+                        {item.label}
+                      </span>
+                    </a>
+
                   </div>
                 );
               })}
