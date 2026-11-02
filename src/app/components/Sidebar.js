@@ -1,6 +1,7 @@
 
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -28,6 +29,18 @@ const menuItems = [
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const pathname = usePathname();
+
+  // const { data: session } = authClient.useSession();
+  // const data = session?.user;
+  // console.log(data)
+
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut();
+    } finally {
+      window.location.href = "/login";
+    }
+  };
 
   return (
     <aside
@@ -61,11 +74,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
               href={item.link}
               key={item.name}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-                active
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
-              }`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${active
+                ? "bg-blue-600 text-white"
+                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                }`}
             >
               <Icon size={19} />
               <span className="text-sm font-medium">
@@ -83,7 +95,9 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
           Settings
         </button>
 
-        <button className="flex items-center gap-3 text-red-400 px-4 py-3">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 text-red-400 px-4 py-3 cursor-pointer">
           <FiLogOut size={19} />
           Logout
         </button>
