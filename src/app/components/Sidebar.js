@@ -30,9 +30,9 @@ const menuItems = [
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const pathname = usePathname();
 
-  // const { data: session } = authClient.useSession();
-  // const data = session?.user;
-  // console.log(data)
+  const { data: session } = authClient.useSession();
+  const data = session?.user;
+  console.log(data)
 
   const handleLogout = async () => {
     try {

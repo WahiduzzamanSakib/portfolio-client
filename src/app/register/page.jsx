@@ -67,7 +67,11 @@ const SignUpPage = () => {
                 password,
                 name,
                 image: image || null,
+
             });
+
+            console.log("SIGNUP DATA:", data);
+            console.log("SIGNUP ERROR:", error);
 
             if (error) {
                 toast.error(error.message || "Registration failed");
@@ -76,7 +80,7 @@ const SignUpPage = () => {
 
             toast.success("Registration successful!");
             setTimeout(() => {
-                router.push("/dashboard");
+                 router.push("/dashboard");
             }, 1000);
         } catch (err) {
             console.error(err);
@@ -124,7 +128,9 @@ const SignUpPage = () => {
                     </motion.div>
 
                     {/* Form */}
-                    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+                    <form
+                        onSubmit={onSubmit}
+                        className="flex flex-col gap-4">
                         <motion.div variants={item}>
                             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                                 Full Name
@@ -233,7 +239,7 @@ const SignUpPage = () => {
                             href="/login"
                             className="text-blue-600 font-bold hover:underline"
                         >
-                           Login
+                            Login
                         </Link>
                     </motion.p>
                 </div>
