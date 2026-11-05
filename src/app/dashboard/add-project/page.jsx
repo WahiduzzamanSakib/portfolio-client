@@ -4,8 +4,13 @@
 import React, { useState } from "react";
 import { Button } from "@heroui/react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
+import { authClient } from "@/lib/auth-client";
 
 const AddProjectPage = () => {
+  const { data: session } = authClient.useSession();
+  const email = session?.user?.email 
+  // console.log("Email", email)
+
   // Dynamic fields
   const [features, setFeatures] = useState([""]);
   const [challenges, setChallenges] = useState([""]);
@@ -45,6 +50,7 @@ const AddProjectPage = () => {
       title: formData.get("title"),
       desc: formData.get("desc"),
       image: formData.get("image"),
+      ownerEmail: email,
 
       tags: formData
         .get("tags")
@@ -64,31 +70,31 @@ const AddProjectPage = () => {
 
     console.log("Submitting Project Data:", data);
 
-    // try {
-    //   const res = await fetch(
-    //     `${process.env.NEXT_PUBLIC_SERVER_URL}/projects`,
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify(data),
-    //     }
-    //   );
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/projects`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
-    //   const result = await res.json();
-    //   if (!res.ok) {
-    //     throw new Error(result.message || "Failed to add project");
-    //   }
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.message || "Failed to add project");
+      }
 
-    //   console.log(result);
-    //   toast.success("Project added successfully!");
-    //   router.push("/dashboard/projects");
+      console.log(result);
+      toast.success("Project added successfully!");
+      router.push("/dashboard/projects");
 
-    // } catch (error) {
-    //   console.error(error);
-    //   toast.error("Failed to add project");
-    // }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add project");
+    }
   };
 
   return (
