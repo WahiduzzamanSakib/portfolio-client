@@ -1,224 +1,234 @@
 
 "use client";
 
-import React, { useState } from "react";
-import {
-  FiCode,
-  FiCopy,
-  FiCheck,
-  FiInfo,
-  FiDatabase,
-  FiGlobe,
-} from "react-icons/fi";
+import { useState } from "react";
+import { FiCopy, FiCheck, FiCode } from "react-icons/fi";
 
-const BASE_URL = "https://your-domain.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 const apiItems = [
   {
-    name: "Get Visitor Analytics",
+    name: "Get Active Projects",
     method: "GET",
-    endpoint: "/api/analytics",
+    endpoint: "/projects",
     description:
-      "Get total website views and unique visitor statistics.",
-    body: null,
-    response: {
-      totalVisitors: 120,
-      totalViews: 350,
-    },
+      "Get all active projects for displaying on the public portfolio website.",
   },
   {
-    name: "Track Website Visitor",
-    method: "POST",
-    endpoint: "/api/analytics",
+    name: "Get Owner's All Projects",
+    method: "GET",
+    endpoint: "/my-projects?ownerEmail={ownerEmail}",
     description:
-      "Save visitor information and the page path they visited.",
-    body: {
-      visitorId: "unique-visitor-id",
-      pagePath: "/projects",
-    },
-    response: {
-      success: true,
-    },
+      "Get all projects of a specific owner, including Active and Inactive projects.",
   },
+  {
+    name: "Get Single Project Details",
+    method: "GET",
+    endpoint: "/projects/{projectId}",
+    description:
+      "Get complete details of a single project using its custom project ID.",
+  },
+  // {
+  //   name: "Add New Project",
+  //   method: "POST",
+  //   endpoint: "/projects",
+  //   description:
+  //     "Create and save a new project in the MongoDB database.",
+  // },
+  // {
+  //   name: "Update Project Status",
+  //   method: "PATCH",
+  //   endpoint: "/projects/{mongoObjectId}/status",
+  //   description:
+  //     "Change a project's status between Active and Inactive using its MongoDB ObjectId.",
+  // },
+  // {
+  //   name: "Update Project Order",
+  //   method: "PATCH",
+  //   endpoint: "/projects/order",
+  //   description:
+  //     "Update the display order of projects.",
+  // },
+  // {
+  //   name: "Delete Project",
+  //   method: "DELETE",
+  //   endpoint: "/projects/{mongoObjectId}",
+  //   description:
+  //     "Permanently delete a project using its MongoDB ObjectId.",
+  // },
 ];
 
 const methodColors = {
   GET: "bg-green-100 text-green-700",
   POST: "bg-blue-100 text-blue-700",
-  PUT: "bg-yellow-100 text-yellow-700",
-  PATCH: "bg-purple-100 text-purple-700",
+  PATCH: "bg-orange-100 text-orange-700",
+  PUT: "bg-purple-100 text-purple-700",
   DELETE: "bg-red-100 text-red-700",
 };
 
 export default function AllApis() {
-  const [copied, setCopied] = useState("");
+  const [copiedIndex, setCopiedIndex] = useState(null);
 
-  const handleCopy = async (text, id) => {
+  const handleCopy = async (url, index) => {
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(id);
+      await navigator.clipboard.writeText(url);
+      setCopiedIndex(index);
 
       setTimeout(() => {
-        setCopied("");
+        setCopiedIndex(null);
       }, 2000);
     } catch (error) {
-      console.error("Copy failed:", error);
+      console.error("Failed to copy URL:", error);
     }
   };
 
+  const totalApis = apiItems.length;
+  const totalMethods = new Set(
+    apiItems.map((api) => api.method)
+  ).size;
+
   return (
-    <div className="space-y-6">
-
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          All APIs
-        </h2>
-
-        <p className="text-sm text-gray-500 mt-1">
-          Explore API documentation and copy endpoints to use in your projects.
-        </p>
-      </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <FiCode className="text-xl" />
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Total API Endpoints
-              </p>
-
-              <h3 className="text-2xl font-bold text-gray-900">
-                {apiItems.length}
-              </h3>
-            </div>
+    <div className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-950 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <div className="mb-4 inline-flex rounded-xl bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            <FiCode size={28} />
           </div>
-        </div>
 
-        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
-              <FiDatabase className="text-xl" />
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Available Methods
-              </p>
-
-              <h3 className="text-2xl font-bold text-gray-900">
-                {new Set(apiItems.map((api) => api.method)).size}
-              </h3>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* API Documentation */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6">
-
-        <div className="flex items-center gap-3 mb-6">
-          <FiGlobe className="text-xl text-blue-600" />
-
-          <h3 className="text-lg font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
             API Documentation
-          </h3>
+          </h1>
+
+          <p className="mx-auto mt-3 max-w-2xl text-gray-600 dark:text-gray-400">
+            Explore all available APIs for managing and
+            retrieving portfolio projects.
+          </p>
         </div>
 
-        <div className="space-y-6">
+        {/* Summary */}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Total API Endpoints
+            </p>
 
+            <h2 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+              {totalApis}
+            </h2>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              HTTP Methods
+            </p>
+
+            <h2 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+              {totalMethods}
+            </h2>
+          </div>
+        </div>
+
+        {/* API List */}
+        <div className="space-y-5">
           {apiItems.map((api, index) => {
-            const copyId = `endpoint-${index}`;
             const fullUrl = `${BASE_URL}${api.endpoint}`;
 
             return (
               <div
-                key={copyId}
-                className="border border-gray-200 rounded-xl p-4 md:p-5 space-y-4"
+                key={index}
+                className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6"
               >
-
                 {/* API Title */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-
-                  <h4 className="font-bold text-gray-900">
-                    {index + 1}. {api.name}
-                  </h4>
-
-                  {/* <span
-                    className={`w-fit px-3 py-1 rounded-md text-xs font-bold ${
+                <div className="flex flex-wrap items-center gap-3">
+                  <span
+                    className={`rounded-md px-3 py-1 text-xs font-bold ${
                       methodColors[api.method]
                     }`}
                   >
                     {api.method}
-                  </span> */}
+                  </span>
 
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {api.name}
+                  </h3>
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-gray-600">
+                <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
                   {api.description}
                 </p>
 
                 {/* Endpoint */}
-                <div className="bg-gray-50 rounded-lg p-3">
+                <div className="mt-5">
+                  {/* <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    API Endpoint
+                  </p> */}
 
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-
-                    <div className="min-w-0">
-                      {/* <p className="text-xs text-gray-500 mb-1">
-                        API Endpoint
-                      </p> */}
-
-                      <code className="text-sm text-gray-800 break-all">
-                        {fullUrl}
-                      </code>
-                    </div>
+                  <div className="flex flex-col gap-3 rounded-lg bg-gray-100 p-3 dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between">
+                    <code className="break-all text-sm text-gray-800 dark:text-gray-200">
+                      {fullUrl}
+                    </code>
 
                     <button
-                      onClick={() => handleCopy(fullUrl, copyId)}
-                      className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition shrink-0"
+                      onClick={() =>
+                        handleCopy(fullUrl, index)
+                      }
+                      className="flex shrink-0 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
                     >
-                      {copied === copyId ? (
+                      {copiedIndex === index ? (
                         <>
-                          <FiCheck />
+                          <FiCheck size={16} />
                           Copied
                         </>
                       ) : (
                         <>
-                          <FiCopy />
+                          <FiCopy size={16} />
                           Copy URL
                         </>
                       )}
                     </button>
-
                   </div>
                 </div>
               </div>
             );
           })}
-
         </div>
 
+        {/* Note */}
+        <div className="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950/30">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-300">
+            Important Notes
+          </h3>
+
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-blue-800 dark:text-blue-200">
+            <li>
+              Replace dynamic parameters such as{" "}
+              <code>{"{ownerEmail}"}</code>,{" "}
+              <code>{"{projectId}"}</code> and{" "}
+              <code>{"{mongoObjectId}"}</code> with actual values.
+            </li>
+
+            <li>
+              <code>{"{projectId}"}</code> refers to the
+              custom project ID, while{" "}
+              <code>{"{mongoObjectId}"}</code> refers to
+              MongoDB's <code>_id</code>.
+            </li>
+
+            <li>
+              POST and PATCH endpoints require JSON request
+              bodies.
+            </li>
+
+            <li>
+              The API base URL is configured through the
+              <code> NEXT_PUBLIC_SERVER_URL </code>
+              environment variable.
+            </li>
+          </ul>
+        </div>
       </div>
-
-      {/* Note */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-        <FiInfo className="text-blue-600 text-lg mt-0.5 shrink-0" />
-
-        <p className="text-sm text-blue-800 leading-6">
-          Replace the example domain with the actual deployed website URL
-          before using these endpoints. Request and response examples
-          are provided to help developers understand how the APIs work.
-        </p>
-      </div>
-
     </div>
   );
 }

@@ -32,9 +32,11 @@ const AllprojectPage = () => {
 
     const fetchProjects = async () => {
       try {
-        const res = await fetch(
-          `${API}/my-projects?ownerEmail=${encodeURIComponent(email)}`
-        );
+        // const res = await fetch(
+        //   `${API}/my-projects?ownerEmail=${encodeURIComponent(email)}`
+        // );
+        
+          const res = await fetch(`${API}/my-projects`)
 
         if (!res.ok) throw new Error();
 
