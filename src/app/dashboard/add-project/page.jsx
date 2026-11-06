@@ -5,10 +5,13 @@ import React, { useState } from "react";
 import { Button } from "@heroui/react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const AddProjectPage = () => {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
-  const email = session?.user?.email 
+  const email = session?.user?.email
   // console.log("Email", email)
 
   // Dynamic fields
@@ -68,7 +71,7 @@ const AddProjectPage = () => {
       isActive: formData.get("isActive") === "true",
     };
 
-    console.log("Submitting Project Data:", data);
+    // console.log("Submitting Project Data:", data);
 
     try {
       const res = await fetch(
@@ -89,7 +92,11 @@ const AddProjectPage = () => {
 
       console.log(result);
       toast.success("Project added successfully!");
-      router.push("/dashboard/projects");
+      e.target.reset();
+      setFeatures([""]);
+      setChallenges([""]);
+      setFuturePlans([""]);
+      router.push("/dashboard/all-projects");
 
     } catch (error) {
       console.error(error);
