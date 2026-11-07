@@ -1,75 +1,69 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import {
-  FiMoreVertical,
-  FiEdit,
-  FiTrash2,
-  FiArrowUp,
-  FiArrowDown,
-  FiEye,
-  FiEyeOff,
-  FiFolder,
-} from "react-icons/fi";
+import { FiTrash2, FiArrowUp, FiArrowDown, FiFolder } from "react-icons/fi";
+import { EditProjectsModal } from "@/app/components/EditProjectsModal";
+
+const API = process.env.NEXT_PUBLIC_SERVER_URL;
 
 const AllprojectPage = () => {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const email = session?.user?.email;
   const router = useRouter();
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openMenu, setOpenMenu] = useState(null);
-
-  const API = process.env.NEXT_PUBLIC_SERVER_URL;
 
   // Get owner's all projects
-  useEffect(() => {
+  const fetchProjects = useCallback(async () => {
     if (!email) return;
 
-    const fetchProjects = async () => {
-      try {
-        // const res = await fetch(
-        //   `${API}/my-projects?ownerEmail=${encodeURIComponent(email)}`
-        // );
-        
-          const res = await fetch(`${API}/my-projects`)
+    try {
+      // const res = await fetch(
+      //   `${API}/my-projects?ownerEmail=${encodeURIComponent(email)}`
+      // );
+      const res = await fetch(`${API}/my-projects`)
 
-        if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error();
 
-        const data = await res.json();
+      const data = await res.json();
 
-        setProjects(
-          data.sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
-        );
-      } catch {
-        toast.error("Could not load projects");
-      } finally {
-        setLoading(false);
-      }
-    };
+      setProjects(
+        [...data].sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
+      );
+    } catch {
+      toast.error("Could not load projects");
+    } finally {
+      setLoading(false);
+    }
+  }, [email]);
+
+  useEffect(() => {
+    // Wait until the session check finishes
+    if (isPending) return;
+
+    // Logged out: stop the loading state instead of spinning forever
+    if (!email) {
+      setLoading(false);
+      return;
+    }
 
     fetchProjects();
-  }, [email, API]);
+  }, [isPending, email, fetchProjects]);
 
   // Active / Inactive
   const toggleStatus = async (project) => {
-    setOpenMenu(null);
-
     try {
-      const res = await fetch(
-        `${API}/projects/${project._id}/status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            isActive: !project.isActive,
-          }),
-        }
-      );
+      const res = await fetch(`${API}/projects/${project._id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isActive: !project.isActive,
+        }),
+      });
 
       if (!res.ok) throw new Error();
 
@@ -89,18 +83,14 @@ const AllprojectPage = () => {
 
   // Change order
   const moveProject = async (index, direction) => {
-    setOpenMenu(null);
-
     const newIndex = index + direction;
 
     if (newIndex < 0 || newIndex >= projects.length) return;
 
-    const updated = [...projects];
+    const previous = projects; // keep a copy so we can roll back
 
-    [updated[index], updated[newIndex]] = [
-      updated[newIndex],
-      updated[index],
-    ];
+    const updated = [...projects];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
 
     const orderedProjects = updated.map((project, i) => ({
       ...project,
@@ -125,14 +115,13 @@ const AllprojectPage = () => {
 
       toast.success("Project order updated");
     } catch {
+      setProjects(previous); // roll back on failure
       toast.error("Order update failed");
     }
   };
 
   // Delete project
   const deleteProject = async (id) => {
-    setOpenMenu(null);
-
     if (!window.confirm("Are you sure you want to delete this project?")) {
       return;
     }
@@ -162,13 +151,10 @@ const AllprojectPage = () => {
 
   return (
     <div className="bg-white rounded-2xl p-5 md:p-8 shadow-sm border border-gray-100">
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            All Projects
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">All Projects</h2>
           <p className="text-sm text-gray-500 mt-2">
             Manage and organize your portfolio projects.
           </p>
@@ -176,7 +162,7 @@ const AllprojectPage = () => {
 
         <button
           onClick={() => router.push("/dashboard/add-project")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition cursor-pointer"
         >
           + Add Project
         </button>
@@ -209,9 +195,7 @@ const AllprojectPage = () => {
       {/* Project List */}
       <div className="mt-7">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-800">
-            Your Projects
-          </h3>
+          <h3 className="font-semibold text-gray-800">Your Projects</h3>
           <span className="text-xs text-gray-400">
             {projects.length} projects
           </span>
@@ -220,9 +204,7 @@ const AllprojectPage = () => {
         {projects.length === 0 ? (
           <div className="text-center py-16 border border-dashed rounded-2xl">
             <FiFolder className="mx-auto text-4xl text-gray-300 mb-3" />
-            <h3 className="font-semibold text-gray-700">
-              No projects found
-            </h3>
+            <h3 className="font-semibold text-gray-700">No projects found</h3>
             <p className="text-sm text-gray-400 mt-1">
               Start by adding your first project.
             </p>
@@ -251,28 +233,25 @@ const AllprojectPage = () => {
 
                   <div className="mt-2">
                     <span
-                      className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${project.isActive
-                        ? "bg-green-50 text-green-700"
-                        : "bg-gray-100 text-gray-500"
-                        }`}
+                      className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
+                        project.isActive
+                          ? "bg-green-50 text-green-700"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
                     >
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${project.isActive
-                          ? "bg-green-500"
-                          : "bg-gray-400"
-                          }`}
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          project.isActive ? "bg-green-500" : "bg-gray-400"
+                        }`}
                       />
                       {project.isActive ? "Published" : "Hidden"}
                     </span>
                   </div>
                 </div>
 
-                {/* Action Dropdown */}
-
                 {/* Actions */}
                 <div className="flex flex-wrap items-center gap-2 shrink-0">
-
-                  {/* Active / Inactive Dropdown - Last */}
+                  {/* Active / Inactive */}
                   <select
                     value={project.isActive ? "true" : "false"}
                     onChange={(e) => {
@@ -282,10 +261,11 @@ const AllprojectPage = () => {
                         toggleStatus(project);
                       }
                     }}
-                    className={`rounded-lg px-3 py-2.5 text-sm font-medium outline-none cursor-pointer ${project.isActive
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-600"
-                      }`}
+                    className={`rounded-lg px-3 py-2.5 text-sm font-medium outline-none cursor-pointer ${
+                      project.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
                   >
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
@@ -296,7 +276,7 @@ const AllprojectPage = () => {
                     onClick={() => moveProject(index, -1)}
                     disabled={index === 0}
                     title="Move up"
-                    className="border rounded-lg p-2.5 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
+                    className="border rounded-lg p-2.5 text-gray-600 hover:bg-gray-100 disabled:opacity-30 cursor-pointer"
                   >
                     <FiArrowUp size={18} />
                   </button>
@@ -306,18 +286,16 @@ const AllprojectPage = () => {
                     onClick={() => moveProject(index, 1)}
                     disabled={index === projects.length - 1}
                     title="Move down"
-                    className="border rounded-lg p-2.5 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
+                    className="border rounded-lg p-2.5 text-gray-600 hover:bg-gray-100 disabled:opacity-30 cursor-pointer"
                   >
                     <FiArrowDown size={18} />
                   </button>
 
                   {/* Edit Button */}
-                  <button
-                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg px-3 py-2.5 text-sm transition flex items-center gap-2"
-                  >
-                    <FiEdit size={16} />
-                    Edit
-                  </button>
+                  <EditProjectsModal
+                    project={project}
+                    onUpdated={fetchProjects}
+                  />
 
                   {/* Delete Button */}
                   <button
@@ -327,11 +305,7 @@ const AllprojectPage = () => {
                     <FiTrash2 size={16} />
                     Delete
                   </button>
-
-
-
                 </div>
-
               </div>
             ))}
           </div>
