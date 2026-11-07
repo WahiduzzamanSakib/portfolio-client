@@ -80,7 +80,7 @@ const SignUpPage = () => {
 
             toast.success("Registration successful!");
             setTimeout(() => {
-                 router.push("/dashboard");
+                router.push("/dashboard");
             }, 1000);
         } catch (err) {
             console.error(err);
@@ -90,6 +90,25 @@ const SignUpPage = () => {
         }
     };
 
+     const handleGoogleLogin = async () => {
+    try {
+      const { data, error } = await authClient.signIn.social({
+        provider: "google",
+      });
+
+      if (error) {
+        toast.error(error.message || "Google login failed");
+        return;
+      }
+
+      if (data) {
+        toast.success("Login successful!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Google sign in failed");
+    }
+  };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50/70 px-4 py-12 relative overflow-hidden">
@@ -230,7 +249,17 @@ const SignUpPage = () => {
                         <div className="flex-1 h-px bg-slate-200" />
                     </motion.div>
 
-
+                    {/* Google Button */}
+                    <motion.div variants={item}>
+                        <button
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            className="w-full h-11 rounded-xl border border-slate-200 bg-white font-semibold text-xs text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2.5 shadow-xs cursor-pointer"
+                        >
+                            <FcGoogle size={18} />
+                            <span>Continue with Google</span>
+                        </button>
+                    </motion.div>
 
                     {/* Login Link */}
                     <motion.p variants={item} className="text-center text-xs text-slate-500 mt-6">
