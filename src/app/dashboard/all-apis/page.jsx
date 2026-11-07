@@ -10,21 +10,23 @@ const apiItems = [
   {
     name: "Get Active Projects",
     method: "GET",
-    endpoint: "/projects",
+    endpoint: "https://portfolio-server-eight-chi.vercel.app/projects",
+    // endpoint: "/projects",
     description:
       "Get all active projects for displaying on the public portfolio website.",
   },
-  {
-    name: "Get Owner's All Projects",
-    method: "GET",
-    endpoint: "/my-projects?ownerEmail={ownerEmail}",
-    description:
-      "Get all projects of a specific owner, including Active and Inactive projects.",
-  },
+  // {
+  //   name: "Get Owner's All Projects",
+  //   method: "GET",
+  //   endpoint: "/my-projects?ownerEmail={ownerEmail}",
+  //   description:
+  //     "Get all projects of a specific owner, including Active and Inactive projects.",
+  // },
   {
     name: "Get Single Project Details",
     method: "GET",
-    endpoint: "/projects/{projectId}",
+    endpoint: "https://portfolio-server-eight-chi.vercel.app/projects/{projectId}",
+    // endpoint: "/projects/{projectId}",
     description:
       "Get complete details of a single project using its custom project ID.",
   },
@@ -132,7 +134,8 @@ export default function AllApis() {
         {/* API List */}
         <div className="space-y-5">
           {apiItems.map((api, index) => {
-            const fullUrl = `${BASE_URL}${api.endpoint}`;
+            const fullUrl = `${api.endpoint}`;
+            // const fullUrl = `${BASE_URL}${api.endpoint}`;
 
             return (
               <div
